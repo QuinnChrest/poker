@@ -13,6 +13,10 @@ function App() {
   const createRoom = () => socket.emit("createRoom", name);
   const joinRoom = () => socket.emit("joinRoom", { roomId, name });
   const startGame = () => socket.emit("startGame", roomId);
+  const leaveGame = () => {
+    socket.emit("leaveGame", { roomId, name });
+    setPlayers([]);
+  };
 
   useEffect(() => {
     socket.on("updatePlayers", (players) => setPlayers(players));
@@ -25,27 +29,34 @@ function App() {
     <div>
       {!gameState ? (
         <div>
-          <input
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <button onClick={createRoom}>Create Room</button>
-          <hr />
-          <input
-            placeholder="Room ID"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
-          />
-          <button onClick={joinRoom}>Join Room</button>
-
-          {players.length > 0 && (
+          {players.length > 0 ? (
             <div>
+              <h3>Room ID: {roomId}</h3>
               <h3>Players in room:</h3>
               {players.map((p) => (
                 <div key={p.id}>{p.name}</div>
               ))}
               <button onClick={startGame}>Start Game</button>
+              <button onClick={leaveGame}>Leave Game</button>
+            </div>
+          ) : (
+            <div>
+              <input
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <button disabled={!name} onClick={createRoom}>
+                Create Room
+              </button>
+              <input
+                placeholder="Room ID"
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+              />
+              <button disabled={!roomId || !name} onClick={joinRoom}>
+                Join Room
+              </button>
             </div>
           )}
         </div>

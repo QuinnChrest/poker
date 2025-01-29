@@ -108,6 +108,19 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("leaveGame", ({ roomId, name }) => {
+    const room = rooms.get(roomId);
+    if (room) {
+      room.players = room.players.filter((player) => player.name != name);
+      socket.leave(roomId);
+      io.to(roomId).emit("updatePlayers", room.players);
+      if (players.length == 0)
+        rooms = rooms.filter((room) => room.players.length > 0);
+    } else {
+      socket.emit("error", "Error leaving room");
+    }
+  });
+
   socket.on("playerAction", ({ roomId, action, amount }) => {
     const room = rooms.get(roomId);
     // Handle bet/fold/check logic here
